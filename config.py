@@ -1,15 +1,15 @@
 # Config file that contains common variables
 
 # dataset directory
-XDATASET_DIR = "dataset/train/"
-# YDATASET_DIR = "converted-DS/labels.npy"
-
+DATASET_DIR = "./dataset/train/"
+tfRecords_train = "./tfrecords/train.tfrecords"
+tfRecords_test  = "./tfrecords/test.tfrecords"
 #Number of classes, one class for each of the 10 digits
-NUM_CLASSES = 10
+NUM_CLASSES = 2
 # image size
 img_size = 64
 # Number of color channels for the images: 1 channel for gray-scale
-num_channels = 1
+num_channels = 3
 # Images are stored in one-dimensional arrays of the length
 img_size_flat = img_size*img_size
 # Tuple with height and width of images used to reshape arrays
@@ -17,14 +17,12 @@ img_shape = (img_size, img_size)
 
 # Architecture hyper parameters
 # learning rate
-learning_rate = 0.005
-# number of iterations
-training_iters = 100000
+learning_rate = 0.001
+# number of epochs
+training_epochs = 60
 # batch size
-batch_size = 20
-
-display_step = 10
+batch_size = 32
 # 64x64 image
 n_input = img_size_flat
-
-dropout = 0.75
+# Dropout
+dropout = 0.4
