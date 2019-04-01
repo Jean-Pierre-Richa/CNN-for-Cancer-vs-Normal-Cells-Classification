@@ -27,8 +27,8 @@ def extract_TfRecords(serialized_example, sess, batch_size):
     image = tf.reshape(image, [config.img_size, config.img_size, 3])
 
     # Creates batches by randomly shuffling tensors
-    min_after_dequeue = 50
-    capacity = 500
+    min_after_dequeue = 100
+    capacity = 1000
     images, labels = tf.train.shuffle_batch([image, label], batch_size=batch_size, capacity=capacity,
                                             num_threads=1, min_after_dequeue=min_after_dequeue)
 
