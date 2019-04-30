@@ -96,12 +96,16 @@ def conv_net(images_placeholder, weights, biases, dropout):
     # Max pooling
     conv4 = maxpool2d(conv4, k=2)
     # Convolutional layer 5
-    # conv5 = conv2d(conv4, weights['wc5'], biases['bc5'])
+    conv5 = conv2d(conv4, weights['wc5'], biases['bc5'])
+    # Max pooling
+    conv5 = maxpool2d(conv5, k=2)
+    # Convolutional layer 5
+    # conv6 = conv2d(conv5, weights['wc6'], biases['bc6'])
     # # Max pooling
-    # conv5 = maxpool2d(conv5, k=2)
+    # conv6 = maxpool2d(conv6, k=2)
 
     # Fully connected layer
-    fc1 = tf.reshape(conv4, [-1, weights['wd1'].get_shape().as_list()[0]])
+    fc1 = tf.reshape(conv5, [-1, weights['wd1'].get_shape().as_list()[0]])
     fc1 = tf.add(tf.matmul(fc1, weights['wd1']), biases['bd1'])
     fc1 = tf.nn.relu(fc1)
     fc1 = tf.nn.dropout(fc1, DROPOUT)
@@ -112,7 +116,7 @@ def conv_net(images_placeholder, weights, biases, dropout):
     fc2 = tf.nn.dropout(fc2, DROPOUT)
 
 
-    out = tf.add(tf.matmul(fc2, weights['out']), biases['out'])
+    out = tf.add(tf.matmul(fc1, weights['out']), biases['out'])
     return out
 
 
@@ -144,23 +148,24 @@ def run_training():
             weights = {
                 # 1st layer input 64*64 -> /2 (max pooling) will result in an
                 # output of 32*32
-                'wc1': _variable_with_weight_decay('wc1', [5, 5, 3, 32], 0.0005),
-                'wc2': _variable_with_weight_decay('wc2', [5, 5, 32, 64], 0.0005),
-                'wc3': _variable_with_weight_decay('wc3', [5, 5, 64, 128], 0.0005),
-                'wc4': _variable_with_weight_decay('wc4', [5, 5, 128, 256], 0.0005),
-                # 'wc5': _variable_with_weight_decay('wc5', [5, 5, 256, 512], 0.0005),
+                'wc1': _variable_with_weight_decay('wc1', [5, 5, 3, 32], 0.00005),
+                'wc2': _variable_with_weight_decay('wc2', [5, 5, 32, 64], 0.00005),
+                'wc3': _variable_with_weight_decay('wc3', [5, 5, 64, 128], 0.00005),
+                'wc4': _variable_with_weight_decay('wc4', [5, 5, 128, 256], 0.00005),
+                'wc5': _variable_with_weight_decay('wc5', [5, 5, 256, 512], 0.00005),
+                # 'wc6': _variable_with_weight_decay('wc6', [5, 5, 512, 1024], 0.00005),
                 # After 5 conv layers  the output is 2*2
-                'wd1': _variable_with_weight_decay('wd1', [4*4*256, 2048], 0.0005),
-                'wd2': _variable_with_weight_decay('wd2', [2048, 2048], 0.0005),
-                'out': _variable_with_weight_decay('wout', [2048, NUM_CLASSES], 0.0005)
+                'wd1': _variable_with_weight_decay('wd1', [8*8*512, 1024], 0.00005),
+                'wd2': _variable_with_weight_decay('wd2', [1024, 1024], 0.00005),
+                'out': _variable_with_weight_decay('wout', [1024, NUM_CLASSES], 0.00005)
 
-                # 'wc1': tf.Variable(tf.random_normal([5, 5, 3, 64]), name='wc1'),
-                # 'wc2': tf.Variable(tf.random_normal([5, 5, 64, 128]), name='wc2'),
-                # 'wc3': tf.Variable(tf.random_normal([5, 5, 128, 256]), name='wc3'),
-                # 'wc4': tf.Variable(tf.random_normal([5, 5, 256, 512]), name='wc4'),
-                # 'wd1': tf.Variable(tf.random_normal([4*4*512, 2048]), name='wd1'),
-                # 'wd2': tf.Variable(tf.random_normal([2048, 2048]), name='wd2'),
-                # 'out': tf.Variable(tf.random_normal([2048, config.NUM_CLASSES]), name='wout')
+                # 'wc1': tf.Variable(tf.random_normal([5, 5, 3, 32]), name='wc1'),
+                # 'wc2': tf.Variable(tf.random_normal([5, 5, 32, 64]), name='wc2'),
+                # 'wc3': tf.Variable(tf.random_normal([5, 5, 64, 128]), name='wc3'),
+                # # 'wc4': tf.Variable(tf.random_normal([5, 5, 256, 512]), name='wc4'),
+                # # 'wd1': tf.Variable(tf.random_normal([4*4*512, 2048]), name='wd1'),
+                # # 'wd2': tf.Variable(tf.random_normal([2048, 2048]), name='wd2'),
+                # # 'out': tf.Variable(tf.random_normal([2048, config.NUM_CLASSES]), name='wout')
             }
         with tf.variable_scope('biases'):
             biases = {
@@ -168,18 +173,19 @@ def run_training():
                 'bc2': _variable_with_weight_decay('bc2', [64], 0.000),
                 'bc3': _variable_with_weight_decay('bc3', [128], 0.000),
                 'bc4': _variable_with_weight_decay('bc4', [256], 0.000),
-                # 'bc5': _variable_with_weight_decay('bc5', [512], 0.000),
-                'bd1': _variable_with_weight_decay('bd1', [2048], 0.000),
-                'bd2': _variable_with_weight_decay('bd2', [2048], 0.000),
+                'bc5': _variable_with_weight_decay('bc5', [512], 0.000),
+                # 'bc6': _variable_with_weight_decay('bc6', [1024], 0.000),
+                'bd1': _variable_with_weight_decay('bd1', [1024], 0.000),
+                'bd2': _variable_with_weight_decay('bd2', [1024], 0.000),
                 'out': _variable_with_weight_decay('bout', [NUM_CLASSES], 0.000)
 
-                # 'bc1': tf.Variable(tf.random_normal([64]), name='bc1'),
-                # 'bc2': tf.Variable(tf.random_normal([128]), name='bc2'),
-                # 'bc3': tf.Variable(tf.random_normal([256]), name='bc3'),
-                # 'bc4': tf.Variable(tf.random_normal([512]), name='bc4'),
+                # 'bc1': tf.Variable(tf.random_normal([32]), name='bc1'),
+                # 'bc2': tf.Variable(tf.random_normal([64]), name='bc2'),
+                # 'bc3': tf.Variable(tf.random_normal([128]), name='bc3'),
+                # # 'bc4': tf.Variable(tf.random_normal([512]), name='bc4'),
                 # 'bd1': tf.Variable(tf.random_normal([2048]), name='bd1'),
-                # 'bd2': tf.Variable(tf.random_normal([2048]), name='bd2'),
-                # 'out': tf.Variable(tf.random_normal([config.NUM_CLASSES]), name='bout')
+                # # 'bd2': tf.Variable(tf.random_normal([2048]), name='bd2'),
+                # # 'out': tf.Variable(tf.random_normal([config.NUM_CLASSES]), name='bout')
             }
 
         with tf.variable_scope("model"):
@@ -199,14 +205,10 @@ def run_training():
             optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
             loss_sum = tf.summary.scalar('loss', cost)
 
-        # # print(labels_placeholder)
-        # y_true_cls = labels_placeholder
-        # # y_true_cls = labels_placeholder
-        # y_pred_cls = tf.argmax(model, 1)
-
         # Evaluating the model
         # This is a vector of booleans that tells whether the predicted class equals
         # the true class of each image
+
         correct_model = tf.equal(tf.argmax(model,1), labels_placeholder)
 
         # Calculating the classification accuracy by first type-casting the vector
@@ -281,15 +283,16 @@ def run_training():
                 sess.run(optimizer, feed_dict={
                                 images_placeholder: train_images,
                                 labels_placeholder: train_labels,
-                                keep_prob_placeholder: 1.
+                                keep_prob_placeholder: 0.8
                                 })
+
                 if (iter%training_iters == 0):
                     # print("step ", step)
                     print('*' * 15)
                     summary, loss, acc = sess.run([merged, cost, accuracy], feed_dict={
                                 images_placeholder: train_images,
                                 labels_placeholder: train_labels,
-                                keep_prob_placeholder: 1.
+                                keep_prob_placeholder: 1.0
                                 })
                     print("Iter " + str(iter) + ", Loss = " + \
                           "{:.3f}".format(loss) + ", Training Accuracy = " + \
@@ -311,10 +314,10 @@ def run_training():
                     summary, loss, acc = sess.run([merged, cost, accuracy], feed_dict={
                                         images_placeholder: test_images,
                                         labels_placeholder: test_labels,
-                                        keep_prob_placeholder: 1.
+                                        keep_prob_placeholder: 1.0
                                         # learning_rate_placeholder: learning_rate
                                         })
-                    print('Testing accuracy: ' + '{:.3f}'.format(acc))
+                    print('Testing loss: ' + '{:.3f}'.format(loss) + ', Testing accuracy: ' + '{:.3f}'.format(acc) )
                     test_writer.add_summary(summary, global_step=epoch)
                     epoch+=1
         print('done')

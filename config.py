@@ -7,7 +7,7 @@ DATASET_DIR = "./dataset/train/"
 NUM_CLASSES = 2
 
 # image size
-img_size = 64
+img_size = 256
 
 # Number of color channels for the images: 1 channel for gray-scale
 num_channels = 3
@@ -20,13 +20,13 @@ img_shape = (img_size, img_size)
 
 # Architecture hyper parameters
 # learning rate
-learning_rate = 0.0001
+learning_rate = 0.001
 
 # number of epochs
 training_epochs = 60
 
 # batch size
-batch_size = 128
+batch_size = 256
 
 # 64x64 image
 n_input = img_size_flat
