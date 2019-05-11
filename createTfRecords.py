@@ -9,8 +9,8 @@ from tqdm import tqdm
 import augmentSet
 import random
 
-DATASET = config.DATASET_DIR
-img_size = config.img_size
+DATASET = config.dataset_dir
+IMG_SIZE = config.img_size
 all_list = list()
 training_list = list()
 labels_list = list()
@@ -60,7 +60,7 @@ test_labels = labels_list[int(0.8*len(labels_list)):]
 # print ('test_addrs ', test_addrs)
 def load_image(addr):
     img = cv2.imread(addr)
-    img = cv2.resize(img, dsize=(img_size, img_size), interpolation=cv2.INTER_CUBIC)
+    img = cv2.resize(img, dsize=(IMG_SIZE, IMG_SIZE), interpolation=cv2.INTER_CUBIC)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = img.astype(np.float32)
     return img

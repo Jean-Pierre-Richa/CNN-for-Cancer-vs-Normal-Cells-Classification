@@ -7,16 +7,20 @@ from pathlib import Path
 import readTfrecords
 import gc
 
-DATASET_DIR = config.DATASET_DIR
+# Hyperparameters and other useful variables
 BATCH_SIZE = config.batch_size
 IMG_SIZE = config.img_size
 TRAINING_EPOCHS = config.training_epochs
-NUM_CLASSES = config.NUM_CLASSES
+NUM_CLASSES = config.num_classes
 LEARNING_RATE = config.learning_rate
 DROPOUT = config.dropout
+NUM_CHANNELS = config.num_channels
 
+# checkpoint 
 saved_model_dir = "./checkpoints"
-checkpointFile = Path("./checkpoints/checkpoint")
+checkpoint_file = Path("./checkpoints/checkpoint")
+
+
 cwd = os.getcwd()
 
 # Opening the tfrecords file to be used as a serialized example
@@ -54,7 +58,7 @@ else:
 # Define the placeholders
 def placeholder_inputs(BATCH_SIZE):
     with tf.variable_scope('inputs'):
-        images_placeholder = tf.placeholder(tf.float32, [None, IMG_SIZE, IMG_SIZE, 3], name="images")
+        images_placeholder = tf.placeholder(tf.float32, [None, IMG_SIZE, IMG_SIZE, NUM_CHANNELS], name="images")
         labels_placeholder = tf.placeholder(tf.int64, shape=(BATCH_SIZE), name="label")
         keep_prob_placeholder = tf.placeholder(tf.float32) # keep probability
 
@@ -99,10 +103,6 @@ def conv_net(images_placeholder, weights, biases, dropout):
     conv5 = conv2d(conv4, weights['wc5'], biases['bc5'])
     # Max pooling
     conv5 = maxpool2d(conv5, k=2)
-    # Convolutional layer 5
-    # conv6 = conv2d(conv5, weights['wc6'], biases['bc6'])
-    # # Max pooling
-    # conv6 = maxpool2d(conv6, k=2)
 
     # Fully connected layer
     fc1 = tf.reshape(conv5, [-1, weights['wd1'].get_shape().as_list()[0]])
@@ -143,29 +143,21 @@ def run_training():
                         )
         # Output of each conv layer:
         # O = ((W-K+2P)/S)+1
-        # (64-5+(2*2)/1) +1
+        # (256-5+(2*2)/1) +1
         with tf.variable_scope('weights'):
             weights = {
-                # 1st layer input 64*64 -> /2 (max pooling) will result in an
-                # output of 32*32
+                # 1st layer input 256*256 -> /2 (max pooling) will result in an
+                # output of 128*128
                 'wc1': _variable_with_weight_decay('wc1', [5, 5, 3, 32], 0.00005),
                 'wc2': _variable_with_weight_decay('wc2', [5, 5, 32, 64], 0.00005),
                 'wc3': _variable_with_weight_decay('wc3', [5, 5, 64, 128], 0.00005),
                 'wc4': _variable_with_weight_decay('wc4', [5, 5, 128, 256], 0.00005),
                 'wc5': _variable_with_weight_decay('wc5', [5, 5, 256, 512], 0.00005),
-                # 'wc6': _variable_with_weight_decay('wc6', [5, 5, 512, 1024], 0.00005),
-                # After 5 conv layers  the output is 2*2
+                # After 5 conv layers  the output is 8*8
                 'wd1': _variable_with_weight_decay('wd1', [8*8*512, 1024], 0.00005),
                 'wd2': _variable_with_weight_decay('wd2', [1024, 1024], 0.00005),
                 'out': _variable_with_weight_decay('wout', [1024, NUM_CLASSES], 0.00005)
 
-                # 'wc1': tf.Variable(tf.random_normal([5, 5, 3, 32]), name='wc1'),
-                # 'wc2': tf.Variable(tf.random_normal([5, 5, 32, 64]), name='wc2'),
-                # 'wc3': tf.Variable(tf.random_normal([5, 5, 64, 128]), name='wc3'),
-                # # 'wc4': tf.Variable(tf.random_normal([5, 5, 256, 512]), name='wc4'),
-                # # 'wd1': tf.Variable(tf.random_normal([4*4*512, 2048]), name='wd1'),
-                # # 'wd2': tf.Variable(tf.random_normal([2048, 2048]), name='wd2'),
-                # # 'out': tf.Variable(tf.random_normal([2048, config.NUM_CLASSES]), name='wout')
             }
         with tf.variable_scope('biases'):
             biases = {
@@ -174,18 +166,9 @@ def run_training():
                 'bc3': _variable_with_weight_decay('bc3', [128], 0.000),
                 'bc4': _variable_with_weight_decay('bc4', [256], 0.000),
                 'bc5': _variable_with_weight_decay('bc5', [512], 0.000),
-                # 'bc6': _variable_with_weight_decay('bc6', [1024], 0.000),
                 'bd1': _variable_with_weight_decay('bd1', [1024], 0.000),
                 'bd2': _variable_with_weight_decay('bd2', [1024], 0.000),
                 'out': _variable_with_weight_decay('bout', [NUM_CLASSES], 0.000)
-
-                # 'bc1': tf.Variable(tf.random_normal([32]), name='bc1'),
-                # 'bc2': tf.Variable(tf.random_normal([64]), name='bc2'),
-                # 'bc3': tf.Variable(tf.random_normal([128]), name='bc3'),
-                # # 'bc4': tf.Variable(tf.random_normal([512]), name='bc4'),
-                # 'bd1': tf.Variable(tf.random_normal([2048]), name='bd1'),
-                # # 'bd2': tf.Variable(tf.random_normal([2048]), name='bd2'),
-                # # 'out': tf.Variable(tf.random_normal([config.NUM_CLASSES]), name='bout')
             }
 
         with tf.variable_scope("model"):
@@ -208,7 +191,6 @@ def run_training():
         # Evaluating the model
         # This is a vector of booleans that tells whether the predicted class equals
         # the true class of each image
-
         correct_model = tf.equal(tf.argmax(model,1), labels_placeholder)
 
         # Calculating the classification accuracy by first type-casting the vector
@@ -231,7 +213,7 @@ def run_training():
         sess.run(init)
 
         # If an older checkpoint exists, load the weights
-        if (use_pretrained_model==False and checkpointFile.exists()):
+        if (use_pretrained_model==False and checkpoint_file.exists()):
             ckpt = tf.train.get_checkpoint_state(saved_model_dir)
             epoch = int(os.path.basename(ckpt.model_checkpoint_path).split('-')[1])+1
             print("Loading pre-trained weights from epoch ", epoch-1)
@@ -287,7 +269,6 @@ def run_training():
                                 })
 
                 if (iter%training_iters == 0):
-                    # print("step ", step)
                     print('*' * 15)
                     summary, loss, acc = sess.run([merged, cost, accuracy], feed_dict={
                                 images_placeholder: train_images,

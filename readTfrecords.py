@@ -7,7 +7,8 @@ import sys
 
 # batch_size = config.batch_size
 # num_epochs = 60
-img_size = config.img_size
+IMG_SIZE = config.img_size
+NUM_CHANNELS = config.num_channels
 # phase = 'train'
 def extract_TfRecords(serialized_example, sess, batch_size):
 
@@ -24,7 +25,7 @@ def extract_TfRecords(serialized_example, sess, batch_size):
     label = tf.cast(parsed_features['label'], tf.int64)
 
     # Reshape image data into the original shape
-    image = tf.reshape(image, [config.img_size, config.img_size, 3])
+    image = tf.reshape(image, [IMG_SIZE, IMG_SIZE, NUM_CHANNELS])
 
     # Creates batches by randomly shuffling tensors
     min_after_dequeue = 100
