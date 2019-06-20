@@ -17,7 +17,7 @@ num_channels = 3
 learning_rate = 0.001
 
 # number of epochs
-training_epochs = 60
+training_epochs = 16
 
 # batch size
 batch_size = 256

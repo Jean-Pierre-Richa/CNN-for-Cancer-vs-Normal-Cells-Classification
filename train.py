@@ -16,7 +16,7 @@ LEARNING_RATE = config.learning_rate
 DROPOUT = config.dropout
 NUM_CHANNELS = config.num_channels
 
-# checkpoint 
+# checkpoint
 saved_model_dir = "./checkpoints"
 checkpoint_file = Path("./checkpoints/checkpoint")
 
@@ -148,15 +148,15 @@ def run_training():
             weights = {
                 # 1st layer input 256*256 -> /2 (max pooling) will result in an
                 # output of 128*128
-                'wc1': _variable_with_weight_decay('wc1', [5, 5, 3, 32], 0.00005),
-                'wc2': _variable_with_weight_decay('wc2', [5, 5, 32, 64], 0.00005),
-                'wc3': _variable_with_weight_decay('wc3', [5, 5, 64, 128], 0.00005),
-                'wc4': _variable_with_weight_decay('wc4', [5, 5, 128, 256], 0.00005),
-                'wc5': _variable_with_weight_decay('wc5', [5, 5, 256, 512], 0.00005),
+                'wc1': _variable_with_weight_decay('wc1', [5, 5, 3, 32], 0.0005),
+                'wc2': _variable_with_weight_decay('wc2', [5, 5, 32, 64], 0.0005),
+                'wc3': _variable_with_weight_decay('wc3', [5, 5, 64, 128], 0.0005),
+                'wc4': _variable_with_weight_decay('wc4', [5, 5, 128, 256], 0.0005),
+                'wc5': _variable_with_weight_decay('wc5', [5, 5, 256, 512], 0.0005),
                 # After 5 conv layers  the output is 8*8
-                'wd1': _variable_with_weight_decay('wd1', [8*8*512, 1024], 0.00005),
-                'wd2': _variable_with_weight_decay('wd2', [1024, 1024], 0.00005),
-                'out': _variable_with_weight_decay('wout', [1024, NUM_CLASSES], 0.00005)
+                'wd1': _variable_with_weight_decay('wd1', [8*8*512, 1024], 0.0005),
+                'wd2': _variable_with_weight_decay('wd2', [1024, 1024], 0.0005),
+                'out': _variable_with_weight_decay('wout', [1024, NUM_CLASSES], 0.0005)
 
             }
         with tf.variable_scope('biases'):
